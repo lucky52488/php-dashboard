@@ -1,6 +1,7 @@
 <?php
 session_start();
 require('components/_siteUrl.php');
+$title="Login to Paradise";
 if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
     header("location: ".url());
 }

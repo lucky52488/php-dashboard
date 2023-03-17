@@ -6,8 +6,6 @@ node_modules
 *.sql
 *.sqlite
 
-components/_dataconnect.php
-
 my
 
 assets
@@ -15,3 +13,5 @@ assets
 build
 
 todo.txt
+
+components/_dataConnect.php
