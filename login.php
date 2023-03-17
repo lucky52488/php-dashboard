@@ -1,8 +1,8 @@
 <?php
 session_start();
-
+require('components/_siteUrl.php');
 if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
-    header("location: /php-dashboard/index.php");
+    header("location: ".url());
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -16,7 +16,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         if ( $loginP == $userData['password']) {
             $_SESSION['loggedIn'] = true;
             $_SESSION['username'] = $userData['user'];
-            header("location: /php-dashboard/");
+            header("location: ".url());
         }
     }
     $showAlert = true;

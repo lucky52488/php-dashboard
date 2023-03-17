@@ -1,8 +1,9 @@
 <?php
 session_start();
+require('components/_siteUrl.php');
 require('components/_header.php');
 if (!isset($_SESSION['loggedIn']) or !$_SESSION['loggedIn']) {
-    header("location: /php-dashboard/login.php");
+    header("location: ".url()."login.php");
 }
 ?>
 <!-- This is an example component -->
