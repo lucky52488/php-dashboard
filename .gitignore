@@ -6,6 +6,10 @@ node_modules
 *.sql
 *.sqlite
 
+components/_dataconnect.php
+
+my
+
 assets
 
 build

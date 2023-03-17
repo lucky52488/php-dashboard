@@ -10,3 +10,6 @@
     <script src="https://cdn.jsdelivr.net/gh/alpinejs/alpine@v2.x.x/dist/alpine.min.js" async></script>
 </head>
 <body>
+    <div><?= $_SERVER['SERVER_NAME'],
+    $_SERVER['REQUEST_URI'] ?></div>
+    
