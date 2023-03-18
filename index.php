@@ -5,6 +5,7 @@ $title="Paradise Dashboard";
 require('components/_header.php');
 if (!isset($_SESSION['loggedIn']) or !$_SESSION['loggedIn']) {
     header("location: ".url()."login.php");
+    exit();
 }
 ?>
 <!-- This is an example component -->

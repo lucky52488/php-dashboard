@@ -6,7 +6,9 @@ if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']):
     session_unset();
     session_destroy();
     header("location: ".url());
+    exit();
 else:
     header("location: ".url());
+    exit();
 endif;
 ?>

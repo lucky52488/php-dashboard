@@ -22,8 +22,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $sql = "INSERT INTO `item` (`name`, `uom`, `weight-per-pcs`, `rate`, `pcs`, `source`, `cat`) VALUES ('$name', '$uom', '$weightPerPcs', '$rate', '$pcs', '$source', '$cat')";
             $result = mysqli_query($conn, $sql);
             if ($result) {
-                $_SESSION['successMsg'] = "New Category Added Successfully";
+                $_SESSION['successMsg'] = "New Item Added Successfully";
                 header("location: " . url() . "add-new-item.php");
+                exit();
             }
         }
     }
@@ -42,6 +43,10 @@ require('components/_header.php');
 
         <div id="main-content" class="h-full w-full bg-gray-50 relative overflow-y-auto lg:ml-64">
             <div class="pt-6 px-4">
+                <?php if (isset($_SESSION['successMsg']) && $_SESSION['successMsg']) {
+                    require('components/_successMsg.php');
+                    $_SESSION['successMsg'] = false;
+                } ?>
                 <div class="grid grid-cols-1 2xl:grid-cols-1 xl:gap-4 my-4">
                     <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
                         <div class="flex items-center justify-center p-12">
@@ -83,9 +88,9 @@ require('components/_header.php');
                                     </div>
                                     <div class="mb-5">
                                         <label for="pcs" class="mb-3 block text-base font-medium text-[#07074D]">
-                                            PCS (Avg. Quantity)
+                                            PCS (Current Quantity)
                                         </label>
-                                        <input type="number" name="pcs" id="pcs" placeholder="Enter average PCS" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                        <input type="number" name="pcs" id="pcs" placeholder="Enter current available Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                     </div>
                                     <div class="-mx-3 flex flex-wrap">
                                         <div class="w-full px-3">
@@ -112,15 +117,15 @@ require('components/_header.php');
                                                 </label>
                                                 <div class="flex items-center space-x-6">
                                                     <div class="flex items-center">
-                                                        <input type="radio" name="source" id="radioButton1" class="h-5 w-5" required checked="checked" value="inlet" />
+                                                        <input type="radio" name="source" id="radioButton1" class="h-5 w-5" required checked="checked" value="inhouse" />
                                                         <label for="radioButton1" class="pl-3 text-base font-medium text-[#07074D]">
-                                                            Inlet
+                                                            IN HOUSE
                                                         </label>
                                                     </div>
                                                     <div class="flex items-center">
-                                                        <input type="radio" name="source" id="radioButton2" class="h-5 w-5" value="outlet" />
+                                                        <input type="radio" name="source" id="radioButton2" class="h-5 w-5" value="outhouse" />
                                                         <label for="radioButton2" class="pl-3 text-base font-medium text-[#07074D]">
-                                                            Outlet
+                                                            OUT HOUSE
                                                         </label>
                                                     </div>
                                                 </div>

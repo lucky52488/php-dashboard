@@ -4,6 +4,7 @@ require('components/_siteUrl.php');
 $title="Login to Paradise";
 if (isset($_SESSION['loggedIn']) && $_SESSION['loggedIn']) {
     header("location: ".url());
+    exit();
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -18,6 +19,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $_SESSION['loggedIn'] = true;
             $_SESSION['username'] = $userData['user'];
             header("location: ".url());
+            exit();
         }
     }
     $showAlert = true;

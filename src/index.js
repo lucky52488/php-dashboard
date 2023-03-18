@@ -7,3 +7,12 @@ function togglePasswordVisibility() {
         passwordInput.type = 'password';
     }
 }
+
+
+$(".closealertbutton").click(function (e) {
+    // $('.alertbox')[0].hide()
+    // e.preventDefault();
+    pid = $(this).parent().parent().hide(500)
+    console.log(pid)
+    // $(".alertbox", this).hide()
+})
