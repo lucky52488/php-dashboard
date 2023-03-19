@@ -2,10 +2,16 @@
 session_start();
 require('components/_siteUrl.php');
 $title="New Order";
-require('components/_header.php');
 if (!isset($_SESSION['loggedIn']) or !$_SESSION['loggedIn']) {
     header("location: ".url()."login.php");
+    exit();
 }
+if($_SESSION['userRole']>2){
+    header("location: " . url());
+    exit();
+}
+
+require('components/_header.php');
 ?>
 <!-- This is an example component -->
 <div>
