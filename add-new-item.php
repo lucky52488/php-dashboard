@@ -6,7 +6,7 @@ if (!isset($_SESSION['loggedIn']) or !$_SESSION['loggedIn']) {
     header("location: " . url() . "login.php");
     exit();
 }
-if($_SESSION['userRole']>2){
+if ($_SESSION['userRole'] > 2) {
     header("location: " . url());
     exit();
 }
@@ -24,11 +24,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pcs = $_POST["pcs"];
         $cat = $_POST["item-cat"];
         $source = $_POST["source"];
-        if ($name) {
+        $targetDir = "assets/item_pic/";
+        if (!empty($_FILES["pic"]["name"])) {
+            $fileName = rand() . basename($_FILES["pic"]["name"]);
+            $targetFilePath = $targetDir . $fileName;
+            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+            $allowTypes = array('jpg', 'png', 'jpeg', 'webp');
+            if ($_FILES["pic"]["size"] < 500000) {
+                if (in_array($fileType, $allowTypes)) {
+                    if (move_uploaded_file($_FILES["pic"]["tmp_name"], $targetFilePath)) {
+                        // $oldPic = $conn->query("SELECT `pic` FROM `users` WHERE `id`='$uId'");
+                        // $deletePic = mysqli_fetch_assoc($oldPic);
+                        // if (file_exists("assets/item_pic/" . $deletePic['pic'])) {
+                        //     unlink("assets/item_pic/" . $deletePic['pic']);
+                        // }
+                        $sql = "INSERT INTO `item` (`name`, `uom`, `weight-per-pcs`, `rate`, `pcs`, `source`, `cat`, `pic`) VALUES ('$name', '$uom', '$weightPerPcs', '$rate', '$pcs', '$source', '$cat', '$fileName')";
+                        $result = mysqli_query($conn, $sql);
+                        if ($insert) {
+                            $_SESSION['successMsg'] = "Item added successfully.";
+                            header("location: " . urlNow());
+                            exit();
+                        } else {
+                            $_SESSION['errorMsg'] = "Picture Upload failed, please try again.";
+                            header("location: " . urlNow());
+                            exit();
+                        }
+                    } else {
+                        $_SESSION['errorMsg'] = "Sorry, Unable to save picture, please try again.";
+                        header("location: " . urlNow());
+                        exit();
+                    }
+                } else {
+                    $_SESSION['errorMsg'] = 'Sorry, only JPG, JPEG, PNG, WEBP Pictures are allowed to upload.';
+                    header("location: " . urlNow());
+                    exit();
+                }
+            } else {
+                $_SESSION['errorMsg'] = 'Sorry, Picture size is too large max size is 200kb';
+                header("location: " . urlNow());
+                exit();
+            }
+        } elseif ($name) {
             $sql = "INSERT INTO `item` (`name`, `uom`, `weight-per-pcs`, `rate`, `pcs`, `source`, `cat`) VALUES ('$name', '$uom', '$weightPerPcs', '$rate', '$pcs', '$source', '$cat')";
             $result = mysqli_query($conn, $sql);
             if ($result) {
                 $_SESSION['successMsg'] = "New Item Added Successfully";
+                header("location: " . urlNow());
+                exit();
+            } else {
+                $_SESSION['errorMsg'] = 'Something went wrong, try again';
                 header("location: " . urlNow());
                 exit();
             }
@@ -72,6 +116,14 @@ require('components/_header.php');
                                         </div>
                                         <div class="w-full px-3 sm:w-1/2">
                                             <div class="mb-5">
+                                                <label for="pic" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                    Item Image
+                                                </label>
+                                                <input type="file" name="pic" id="pic" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                            </div>
+                                        </div>
+                                        <div class="w-full px-3 sm:w-1/2">
+                                            <div class="mb-5">
                                                 <label for="uom" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Unit of measure
                                                 </label>
@@ -82,24 +134,30 @@ require('components/_header.php');
                                                 </select>
                                             </div>
                                         </div>
-                                    </div>
-                                    <div class="mb-5">
-                                        <label for="weight" class="mb-3 block text-base font-medium text-[#07074D]">
-                                            Weight Per PCS
-                                        </label>
-                                        <input type="number" step="any" name="weight" id="weight" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                    </div>
-                                    <div class="mb-5">
-                                        <label for="price" class="mb-3 block text-base font-medium text-[#07074D]">
-                                            Price
-                                        </label>
-                                        <input type="number" step="any" name="price" id="price" placeholder="Rate (Price in INR)" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                    </div>
-                                    <div class="mb-5">
-                                        <label for="pcs" class="mb-3 block text-base font-medium text-[#07074D]">
-                                            PCS (Current Quantity)
-                                        </label>
-                                        <input type="number" step="any" name="pcs" id="pcs" placeholder="Enter current available Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                        <div class="w-full px-3 sm:w-1/2">
+                                            <div class="mb-5">
+                                                <label for="weight" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                    Weight Per PCS
+                                                </label>
+                                                <input type="number" step="any" name="weight" id="weight" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                            </div>
+                                        </div>
+                                        <div class="w-full px-3 sm:w-1/2">
+                                            <div class="mb-5">
+                                                <label for="price" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                    Rate
+                                                </label>
+                                                <input type="number" step="any" name="price" id="price" placeholder="Rate (Price in INR)" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                            </div>
+                                        </div>
+                                        <div class="w-full px-3 sm:w-1/2">
+                                            <div class="mb-5">
+                                                <label for="pcs" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                    PCS (Current Quantity)
+                                                </label>
+                                                <input type="number" step="any" name="pcs" id="pcs" placeholder="Enter current available Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                            </div>
+                                        </div>
                                     </div>
                                     <div class="-mx-3 flex flex-wrap">
                                         <div class="w-full px-3">

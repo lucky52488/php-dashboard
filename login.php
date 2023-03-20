@@ -17,9 +17,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $userData = mysqli_fetch_assoc($verifyUser);
         if ($loginP == $userData['password']) {
             $_SESSION['loggedIn'] = true;
+            $_SESSION['userId'] = $userData['id'];
             $_SESSION['username'] = $userData['username'];
             $_SESSION['userEmail'] = $userData['email'];
+            $_SESSION['userMobile'] = $userData['mobile'];
             $_SESSION['userRole'] = $userData['role'];
+            $_SESSION['userPic'] = $userData['pic'];
             header("location: " . url());
             exit();
         } else {
