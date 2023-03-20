@@ -23,7 +23,47 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pcs = $_POST["pcs"];
         $cat = $_POST["item-cat"];
         $source = $_POST["source"];
-        if ($name) {
+        $targetDir = "assets/item_pic/";
+        if (!empty($_FILES["pic"]["name"])) {
+            $fileName = rand() . basename($_FILES["pic"]["name"]);
+            $targetFilePath = $targetDir . $fileName;
+            $fileType = pathinfo($targetFilePath, PATHINFO_EXTENSION);
+            $allowTypes = array('jpg', 'png', 'jpeg', 'webp');
+            if ($_FILES["pic"]["size"] < 500000) {
+                if (in_array($fileType, $allowTypes)) {
+                    if (move_uploaded_file($_FILES["pic"]["tmp_name"], $targetFilePath)) {
+                        $oldPic = $conn->query("SELECT `img` FROM `item` WHERE `id`='$updateItemId'");
+                        $deletePic = mysqli_fetch_assoc($oldPic);
+                        if ($deletePic['img'] && file_exists("assets/item_pic/" . $deletePic['img'])) {
+                            unlink("assets/item_pic/" . $deletePic['img']);
+                        }
+                        $sql = "UPDATE `item` SET `name`='$name', `img`='$fileName', `uom`='$uom',`weight-per-pcs`='$weightPerPcs',`rate`='$rate',`pcs`='$pcs',`source`='$source',`cat`='$cat' WHERE `id`='$updateItemId'";
+                        $result = mysqli_query($conn, $sql);
+                        if ($result) {
+                            $_SESSION['successMsg'] = "Item Updated successfully.";
+                            header("location: " . url() . 'item-detail.php');
+                            exit();
+                        } else {
+                            $_SESSION['errorMsg'] = "Picture Upload failed, please try again.";
+                            header("location: " . urlNow());
+                            exit();
+                        }
+                    } else {
+                        $_SESSION['errorMsg'] = "Sorry, Unable to save picture, please try again.";
+                        header("location: " . urlNow());
+                        exit();
+                    }
+                } else {
+                    $_SESSION['errorMsg'] = 'Sorry, only JPG, JPEG, PNG, WEBP Pictures are allowed to upload.';
+                    header("location: " . urlNow());
+                    exit();
+                }
+            } else {
+                $_SESSION['errorMsg'] = 'Sorry, Picture size is too large max size is 200kb';
+                header("location: " . urlNow());
+                exit();
+            }
+        } elseif ($name) {
             $sql = "UPDATE `item` SET `name`='$name',`uom`='$uom',`weight-per-pcs`='$weightPerPcs',`rate`='$rate',`pcs`='$pcs',`source`='$source',`cat`='$cat' WHERE `id`='$updateItemId'";
             $result = mysqli_query($conn, $sql);
             if ($result) {
@@ -87,7 +127,7 @@ require('components/_header.php');
                             </div>
                             <div class="flex items-center justify-center p-12">
                                 <div class="mx-auto w-full max-w-[550px]">
-                                    <form action="" method="POST">
+                                    <form action="" method="POST" enctype="multipart/form-data">
                                         <div class="-mx-3 flex flex-wrap">
                                             <div class="w-full px-3 sm:w-1/2">
                                                 <div class="mb-5">
@@ -95,6 +135,14 @@ require('components/_header.php');
                                                         Item Name
                                                     </label>
                                                     <input value="<?= $item['name'] ?>" type="text" name="item-name" id="item-name" placeholder="Enter New Item Name" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" required />
+                                                </div>
+                                            </div>
+                                            <div class="w-full px-3 sm:w-1/2">
+                                                <div class="mb-5">
+                                                    <label for="pic" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                        Item Image
+                                                    </label>
+                                                    <input type="file" name="pic" id="pic" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                                 </div>
                                             </div>
                                             <div class="w-full px-3 sm:w-1/2">
@@ -108,24 +156,30 @@ require('components/_header.php');
                                                     </select>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <div class="mb-5">
-                                            <label for="weight" class="mb-3 block text-base font-medium text-[#07074D]">
-                                                Weight Per PCS
-                                            </label>
-                                            <input value="<?= $item['weight-per-pcs'] ?>" type="number" step="any" name="weight" id="weight" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                        </div>
-                                        <div class="mb-5">
-                                            <label for="price" class="mb-3 block text-base font-medium text-[#07074D]">
-                                                Price
-                                            </label>
-                                            <input value="<?= $item['rate'] ?>" type="number" step="any" name="price" id="price" placeholder="Rate (Price in INR)" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                        </div>
-                                        <div class="mb-5">
-                                            <label for="pcs" class="mb-3 block text-base font-medium text-[#07074D]">
-                                                PCS (Current Quantity)
-                                            </label>
-                                            <input value="<?= $item['pcs'] ?>" type="number" step="any" name="pcs" id="pcs" placeholder="Enter current available Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                            <div class="w-full px-3 sm:w-1/2">
+                                                <div class="mb-5">
+                                                    <label for="weight" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                        Weight Per PCS
+                                                    </label>
+                                                    <input value="<?= $item['weight-per-pcs'] ?>" type="number" step="any" name="weight" id="weight" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                </div>
+                                            </div>
+                                            <div class="w-full px-3 sm:w-1/2">
+                                                <div class="mb-5">
+                                                    <label for="price" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                        Price
+                                                    </label>
+                                                    <input value="<?= $item['rate'] ?>" type="number" step="any" name="price" id="price" placeholder="Rate (Price in INR)" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                </div>
+                                            </div>
+                                            <div class="w-full px-3 sm:w-1/2">
+                                                <div class="mb-5">
+                                                    <label for="pcs" class="mb-3 block text-base font-medium text-[#07074D]">
+                                                        PCS (Current Quantity)
+                                                    </label>
+                                                    <input value="<?= $item['pcs'] ?>" type="number" step="any" name="pcs" id="pcs" placeholder="Enter current available Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                </div>
+                                            </div>
                                         </div>
                                         <div class="-mx-3 flex flex-wrap">
                                             <div class="w-full px-3">
@@ -192,7 +246,11 @@ require('components/_header.php');
                                             <div class="flex flex-col sm:flex-row sm-items-center space-x-4">
                                                 <div class="flex flex-1 basis-2/5">
                                                     <div class="flex-shrink-0 mx-4">
-                                                        <img class="h-12 w-12 mx-auto rounded-full" src="assets/100924860.jpg" alt="sweet">
+                                                        <?php if ($item['img']) : ?>
+                                                            <img class="h-12 w-12 mx-auto rounded-full" src="assets/item_pic/<?= $item['img'] ?>" alt="sweet">
+                                                        <?php else : ?>
+                                                            <img class="h-12 w-12 mx-auto rounded-full" src="assets/100924860.jpg" alt="sweet">
+                                                        <?php endif ?>
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-sm font-medium text-gray-900">

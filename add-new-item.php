@@ -38,9 +38,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         // if (file_exists("assets/item_pic/" . $deletePic['pic'])) {
                         //     unlink("assets/item_pic/" . $deletePic['pic']);
                         // }
-                        $sql = "INSERT INTO `item` (`name`, `uom`, `weight-per-pcs`, `rate`, `pcs`, `source`, `cat`, `pic`) VALUES ('$name', '$uom', '$weightPerPcs', '$rate', '$pcs', '$source', '$cat', '$fileName')";
+                        $sql = "INSERT INTO `item` (`name`, `uom`, `weight-per-pcs`, `rate`, `pcs`, `source`, `cat`, `img`) VALUES ('$name', '$uom', '$weightPerPcs', '$rate', '$pcs', '$source', '$cat', '$fileName')";
                         $result = mysqli_query($conn, $sql);
-                        if ($insert) {
+                        if ($result) {
                             $_SESSION['successMsg'] = "Item added successfully.";
                             header("location: " . urlNow());
                             exit();
@@ -97,6 +97,10 @@ require('components/_header.php');
                     require('components/_successMsg.php');
                     $_SESSION['successMsg'] = false;
                 } ?>
+                <?php if (isset($_SESSION['errorMsg']) && $_SESSION['errorMsg']) {
+                    require('components/_errorMsg.php');
+                    $_SESSION['errorMsg'] = false;
+                } ?>
                 <div class="grid grid-cols-1 2xl:grid-cols-1 xl:gap-4 my-4">
                     <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
                         <div class="flex items-center justify-center mt-4">
@@ -104,7 +108,7 @@ require('components/_header.php');
                         </div>
                         <div class="flex items-center justify-center p-12">
                             <div class="mx-auto w-full max-w-[550px]">
-                                <form action="" method="POST">
+                                <form action="" method="POST" enctype="multipart/form-data">
                                     <div class="-mx-3 flex flex-wrap">
                                         <div class="w-full px-3 sm:w-1/2">
                                             <div class="mb-5">
