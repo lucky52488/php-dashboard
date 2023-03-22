@@ -6,7 +6,7 @@ if (!isset($_SESSION['loggedIn']) or !$_SESSION['loggedIn']) {
     header("location: " . url() . "login.php");
     exit();
 }
-if($_SESSION['userRole']>2){
+if ($_SESSION['userRole'] > 2) {
     header("location: " . url());
     exit();
 }
@@ -17,11 +17,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_POST["create-package"])) {
         $itemNo = 1;
+        $itemTotal = 0;
         $packageData = ['id' => [], 'nob' => [], 'pib' => []];
         while (isset($_POST["item-select-" . $itemNo])) {
+            $itemId = $_POST["item-select-" . $itemNo];
             $packageData['id'][] = $_POST["item-select-" . $itemNo];
             $packageData['nob'][] = $_POST["nob-" . $itemNo];
             $packageData['pib'][] = $_POST["pib-" . $itemNo];
+            $result = $conn->query("SELECT * FROM `item` WHERE `id`= '$itemId'");
+            $items = $result->fetch_all(MYSQLI_ASSOC);
+            $itemTotal += $items[0]['rate'] * ($_POST["nob-" . $itemNo] * $_POST["pib-" . $itemNo]) * $items[0]['weight-per-pcs'];
             $itemNo++;
         }
         $jsonP = json_encode($packageData);
@@ -29,7 +34,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $pName = $_POST["pName"];
         $pRemark = $_POST["pRemark"];
 
-        $stmt = $conn->prepare("INSERT INTO package (`name`, `package`, `remark`) VALUES ('$pName', ?, '$pRemark')");
+        $stmt = $conn->prepare("INSERT INTO package (`name`, `package`, `total`, `remark`) VALUES ('$pName', ?, '$itemTotal', '$pRemark')");
         $stmt->bind_param("s", $jsonP);
         if ($stmt->execute()) {
             $_SESSION['successMsg'] = "New Package Created Successfully";
@@ -70,9 +75,9 @@ require('components/_header.php');
                             <h3 class="text-xl font-bold leading-none text-gray-900">Create New Package</h3>
                         </div>
                         <div class="flex items-center justify-center p-12">
-                            <div class="mx-auto w-full max-w-[550px]">
+                            <div class="mx-auto w-full">
                                 <form action="" method="POST" id="boxForm">
-                                    <div class="-mx-3 flex flex-wrap">
+                                    <div class="flex flex-wrap">
                                         <div class="w-full px-3">
                                             <div class="mb-5">
                                                 <label for="pName" class="mb-3 block text-base font-medium text-[#07074D]">
@@ -82,13 +87,13 @@ require('components/_header.php');
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="-mx-3 flex flex-wrap" id="addItemBox">
-                                        <div class="w-full px-3">
+                                    <div class="flex flex-wrap" id="addItemBox">
+                                        <div class="w-full px-3 sm:w-1/3">
                                             <div class="mb-5">
                                                 <label for="item-select-1" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Select Item 1
                                                 </label>
-                                                <select name="item-select-1" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-1">
+                                                <select required name="item-select-1" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-1">
                                                     <option value="0">Select</option>
                                                     <?php
                                                     $result = $conn->query("SELECT * FROM `item` WHERE `removed`= 0");
@@ -100,36 +105,38 @@ require('components/_header.php');
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="w-full px-3 sm:w-1/2">
+                                        <div class="w-full px-3 sm:w-1/3">
                                             <div class="mb-5">
                                                 <label for="nob-1" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Total No of Box
                                                 </label>
-                                                <input type="number" name="nob-1" id="nob-1" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required type="number" name="nob-1" id="nob-1" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
-                                        <div class="w-full px-3 sm:w-1/2">
+                                        <div class="w-full px-3 sm:w-1/3">
                                             <div class="mb-5">
                                                 <label for="pib-1" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     PCS in one Box
                                                 </label>
-                                                <input type="number" step="any" name="pib-1" id="pib-1" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required type="number" step="any" name="pib-1" id="pib-1" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="mb-2 cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none" id="removeItem" style="display: none;">Remove Item</div>
-                                    <div class="mb-2 cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none" id="addItem">Add More Item</div>
+                                    <div class="flex justify-end gap-5">
+                                        <div class="w-48 mb-2 cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none" id="removeItem" style="display: none;">Remove Item</div>
+                                        <div class="w-48 mb-2 cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none" id="addItem">Add More Item</div>
+                                    </div>
                                     <div class="-mx-3 flex flex-wrap">
                                         <div class="w-full px-3">
                                             <div class="mb-5">
                                                 <label for="pRemark" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Remark
                                                 </label>
-                                                <input type="text" name="pRemark" id="pRemark" placeholder="Enter New Item Name" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" required />
+                                                <input type="text" name="pRemark" id="pRemark" placeholder="Enter New Item Name" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
                                     </div>
-                                    <button name="create-package" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">
+                                    <button name="create-package" class="w-full bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">
                                         Create Package
                                     </button>
                                 </form>
@@ -150,7 +157,7 @@ require('components/_header.php');
         $("#removeItem").click(function() {
             $("#addItemBox").children("div").slice(-4).remove();
             itemNo--;
-            if(itemNo==1){
+            if (itemNo == 1) {
                 $("#removeItem").hide()
             }
         })
@@ -159,12 +166,12 @@ require('components/_header.php');
             $("#removeItem").show()
             $("#addItemBox").append(`
             <div class="border-t-2 my-2 w-full"></div>
-            <div class="w-full px-3">
+            <div class="w-full px-3 sm:w-1/3">
                                             <div class="mb-5">
                                                 <label for="item-select-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Select Item ${itemNo}
                                                 </label>
-                                                <select name="item-select-${itemNo}" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-${itemNo}">
+                                                <select required name="item-select-${itemNo}" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-${itemNo}">
                                                     <option value="0">Select</option>
                                                     <?php foreach ($items as $item) : ?>
                                                         <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
@@ -172,20 +179,20 @@ require('components/_header.php');
                                                 </select>
                                             </div>
                                         </div>
-                                        <div class="w-full px-3 sm:w-1/2">
+                                        <div class="w-full px-3 sm:w-1/3">
                                             <div class="mb-5">
                                                 <label for="nob-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Total No of Box
                                                 </label>
-                                                <input type="number" name="nob-${itemNo}" id="nob-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required type="number" name="nob-${itemNo}" id="nob-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
-                                        <div class="w-full px-3 sm:w-1/2">
+                                        <div class="w-full px-3 sm:w-1/3">
                                             <div class="mb-5">
                                                 <label for="pib-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     PCS in one Box
                                                 </label>
-                                                <input type="number" step="any" name="pib-${itemNo}" id="pib-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required type="number" step="any" name="pib-${itemNo}" id="pib-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
             `);

@@ -16,11 +16,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     if (isset($_GET["order"]) && isset($_POST["confirm"])) {
         $orderId = $_GET["order"];
-        $sql = "UPDATE `orders` SET `status`=2 WHERE `id`='$orderId'";
+        $sql = "UPDATE `orders` SET `status`= 4 WHERE `id`='$orderId'";
         $result = mysqli_query($conn, $sql);
         if ($result) {
             $_SESSION['successMsg'] = "Order Proceeded Successfully";
-            header("location: " . url() . 'create-order.php');
+            header("location: " . url() . 'completed.php');
             exit();
         }
     } elseif (isset($_GET["order"]) && isset($_POST["cancel"])) {
@@ -29,7 +29,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $result = mysqli_query($conn, $sql);
         if ($result) {
             $_SESSION['errorMsg'] = "Order Canceled";
-            header("location: " . url() . 'create-order.php');
+            header("location: " . url() . 'completed.php');
             exit();
         }
     }
@@ -63,7 +63,7 @@ require('components/_header.php');
 
                     <div class="w-full bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
 
-                        <a href="<?= url() . 'create-order.php' ?>" class="text-cyan-600 hover:text-cyan-700">
+                        <a href="<?= url() . 'completed.php' ?>" class="text-cyan-600 hover:text-cyan-700">
                             <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor" class="bi bi-box-arrow-left" viewBox="0 0 16 16">
                                 <path fill-rule="evenodd" d="M6 12.5a.5.5 0 0 0 .5.5h8a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-8a.5.5 0 0 0-.5.5v2a.5.5 0 0 1-1 0v-2A1.5 1.5 0 0 1 6.5 2h8A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-8A1.5 1.5 0 0 1 5 12.5v-2a.5.5 0 0 1 1 0v2z" />
                                 <path fill-rule="evenodd" d="M.146 8.354a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L1.707 7.5H10.5a.5.5 0 0 1 0 1H1.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3z" />
@@ -182,20 +182,20 @@ require('components/_header.php');
                                     <span>Balance</span>
                                     <span>Rs. <?= $order['balance'] ?>/-</span>
                                 </div>
-                                <div class="flex w-full flex-wrap justify-center gap-5">
+                                <!-- <div class="flex w-full flex-wrap justify-center gap-5">
                                     <form action="" method="post">
                                         <button name="cancel" type="submit" class="bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Cancel</button>
                                         <button name="confirm" type="submit" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Proceed</button>
                                     </form>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                     </div>
                 <?php else : ?>
                     <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
-                        <h3 class="text-2xl font-bold leading-none text-gray-900 mb-4">Pending Orders</h3>
+                        <h3 class="text-2xl font-bold leading-none text-gray-900 mb-4">Completed Orders</h3>
                         <?php
-                        $result = $conn->query("SELECT * FROM `orders` WHERE `status`=1 ORDER BY `id` DESC");
+                        $result = $conn->query("SELECT * FROM `orders` WHERE `status`=4 ORDER BY `id` DESC");
                         $orders = $result->fetch_all(MYSQLI_ASSOC);
                         foreach ($orders as $key => $order) :
                         ?>

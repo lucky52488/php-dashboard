@@ -22,38 +22,60 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $packageTotal = 0;
         $itemData = ['id' => [], 'qty' => []];
         $packageData = ['id' => [], 'qty' => []];
+        if (!isset($_POST["select-item-" . $itemNo]) && !isset($_POST["select-package-" . $packageNo])) {
+            $_SESSION['errorMsg'] = "Please add a item or package to create order";
+            header("location: " . urlNow());
+            exit();
+        }
         while (isset($_POST["select-item-" . $itemNo])) {
+            if (!$_POST["select-item-" . $itemNo] || !$_POST["item-quantity-" . $itemNo]) {
+                $_SESSION['errorMsg'] = "Error! Invalid item no.". $itemNo;
+                header("location: " . urlNow());
+                exit();
+            }
             $itemId = $_POST["select-item-" . $itemNo];
             $itemData['id'][] = $itemId;
             $itemData['qty'][] = $_POST["item-quantity-" . $itemNo];
             $result = $conn->query("SELECT * FROM `item` WHERE `id`= '$itemId'");
             $items = $result->fetch_all(MYSQLI_ASSOC);
-            $itemTotal+=$items[0]['rate']*$_POST["item-quantity-" . $itemNo];
+            $itemTotal += $items[0]['rate'] * $_POST["item-quantity-" . $itemNo];
             $itemNo++;
         }
         while (isset($_POST["select-package-" . $packageNo])) {
+            if (!$_POST["select-package-" . $packageNo] || !$_POST["package-quantity-" . $packageNo]) {
+                $_SESSION['errorMsg'] = "Error! Invalid package no.". $packageNo;
+                header("location: " . urlNow());
+                exit();
+            }
+            $packageId = $_POST["select-package-" . $packageNo];
             $packageData['id'][] = $_POST["select-package-" . $packageNo];
             $packageData['qty'][] = $_POST["package-quantity-" . $packageNo];
+            $result = $conn->query("SELECT * FROM `package` WHERE `id`= '$packageId'");
+            $packages = $result->fetch_all(MYSQLI_ASSOC);
+            $packageTotal += $packages[0]['total'] * $_POST["package-quantity-" . $packageNo];
             $packageNo++;
         }
+        $orderTotal = $itemTotal + $packageTotal;
         $jsonI = json_encode($itemData);
         $jsonP = json_encode($packageData);
         // print_r($jsonP);
         $cName = $_POST["customer-name"];
         $cMobile = $_POST["customer-mobile"];
+        $aMobile = $_POST["alternate-no"];
         $cEmail = $_POST["customer-email"];
         $cAddress = $_POST["customer-address"];
+        $gst = $_POST["gst"];
         $dDate = $_POST["delivery-date"];
         $rDate = $_POST["reminder-date"];
         $status = 1;
         // $stmt = $conn->prepare("INSERT INTO orders (`name`, `mobile`, `email`, `address`, `dod`, `reminder`, `status`, `items`, `packages`) VALUES ('$cName', '$cMobile', '$cEmail', '$cAddress', '$dDate', '$rDate', '$status', ?)");
         // $stmt->bind_param("s", $jsonI, $jsonP);
-        $stmt = $conn->prepare("INSERT INTO orders (`name`, `mobile`, `email`, `address`, `dod`, `reminder`, `status`, `items`, `packages`, `total`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssssissd", $cName, $cMobile, $cEmail, $cAddress, $dDate, $rDate, $status, $jsonI, $jsonP, $itemTotal);
-        
+        $stmt = $conn->prepare("INSERT INTO orders (`name`, `mobile`, `email`, `address`, `dod`, `reminder`, `status`, `items`, `packages`, `total`, `net`, `balance`, `alternate-no`, `gst`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssissdddss", $cName, $cMobile, $cEmail, $cAddress, $dDate, $rDate, $status, $jsonI, $jsonP, $orderTotal, $orderTotal, $orderTotal, $aMobile, $gst);
+
         if ($stmt->execute()) {
-            $_SESSION['successMsg'] = "New Package Created Successfully";
-            header("location: " . urlNow());
+            $_SESSION['successMsg'] = "Customer Invoice Created Successfully";
+            header("location: " . url().'customers-detail.php');
             exit();
         } else {
             $_SESSION['errorMsg'] = "Something went wrong";
@@ -98,11 +120,11 @@ require('components/_header.php');
                                     <div class="flex flex-wrap w-full">
                                         <div class="sm:w-1/3 w-full p-2">
                                             <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Customer Name</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Customer Name" name="customer-name" id="customer-name">
+                                            <input required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Customer Name" name="customer-name" id="customer-name">
                                         </div>
                                         <div class="sm:w-1/3 w-full p-2">
                                             <label for="customer-mobile" class="mb-3 text-base font-medium text-[#07074D]">Mobile Number</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-mobile" id="customer-mobile">
+                                            <input required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-mobile" id="customer-mobile">
                                         </div>
                                         <div class="sm:w-1/3 w-full p-2">
                                             <label for="customer-email" class="mb-3 text-base font-medium text-[#07074D]">Email</label>
@@ -111,6 +133,14 @@ require('components/_header.php');
                                         <div class="w-full p-2">
                                             <label for="customer-address" class="mb-3 text-base font-medium text-[#07074D]">Delivery Address</label>
                                             <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Delivery Address" name="customer-address" id="customer-address">
+                                        </div>
+                                        <div class="sm:w-1/2 w-full p-2">
+                                            <label for="alternate-no" class="mb-3 text-base font-medium text-[#07074D]">Alternate Contact Number</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Alternate Number" name="alternate-no" id="alternate-no">
+                                        </div>
+                                        <div class="sm:w-1/2 w-full p-2">
+                                            <label for="gst" class="mb-3 text-base font-medium text-[#07074D]">GST No.</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter GST No (If Any)" name="gst" id="gst">
                                         </div>
                                         <div class="sm:w-2/3 w-full p-2">
                                             <label for="delivery-date" class="mb-3 text-base font-medium text-[#07074D]">Delivery Date & Time</label>
@@ -213,7 +243,7 @@ require('components/_header.php');
                                             <div class="flex flex-wrap w-full">
                                                 <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
                                                     <label for="select-item-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Item ${itemNo}</label>
-                                                    <select class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-item-${itemNo}" id="select-item-${itemNo}">
+                                                    <select required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-item-${itemNo}" id="select-item-${itemNo}">
                                                         <option value="0">Select</option>
                                                         <?php
                                                         $result = $conn->query("SELECT * FROM `item` WHERE `removed`= 0");
@@ -226,7 +256,7 @@ require('components/_header.php');
                                                 </div>
                                                 <div class="xl:w-1/4 sm:w-1/3 w-full p-2">
                                                     <label for="item-quantity-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="number" step="any" placeholder="Enter Item Quantity" name="item-quantity-${itemNo}" id="item-quantity-${itemNo}">
+                                                    <input required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="number" step="any" placeholder="Enter Item Quantity" name="item-quantity-${itemNo}" id="item-quantity-${itemNo}">
                                                 </div>
                                             </div>
                                             </div>`);
@@ -238,20 +268,20 @@ require('components/_header.php');
                                             <div class="flex flex-wrap w-full">
                                                 <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
                                                     <label for="select-package-${packageNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Package ${packageNo}</label>
-                                                    <select class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-package-${packageNo}" id="select-package-${packageNo}">
+                                                    <select required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-package-${packageNo}" id="select-package-${packageNo}">
                                                         <option value="0">Select</option>
                                                         <?php
                                                         $result = $conn->query("SELECT * FROM `package`");
                                                         $packages = $result->fetch_all(MYSQLI_ASSOC);
                                                         foreach ($packages as $package) :
                                                         ?>
-                                                            <option value="<?= $package['id'] ?>"><?= $package['name'] ?></option>
+                                                            <option value="<?= $package['id'] ?>"><?= $package['name'] ?> | Price: <?= $package['total'] ?>/-</option>
                                                         <?php endforeach; ?>
                                                     </select>
                                                 </div>
                                                 <div class="xl:w-1/4 sm:w-1/3 w-full p-2">
                                                     <label for="package-quantity-${packageNo}" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="number" step="any" placeholder="Enter Item Quantity" name="package-quantity-${packageNo}" id="package-quantity-${packageNo}">
+                                                    <input required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="number" step="any" placeholder="Enter Item Quantity" name="package-quantity-${packageNo}" id="package-quantity-${packageNo}">
                                                 </div>
                                             </div>
                                             </div>`);
