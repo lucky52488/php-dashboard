@@ -12,24 +12,45 @@ if ($_SESSION['userRole'] > 2) {
 }
 
 require("components/_dataConnect.php");
-$title = "Create New Box";
+$title = "New Customer Order";
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    if (isset($_POST["create-package"])) {
+    if (isset($_POST["create-order"])) {
         $itemNo = 1;
-        $packageData = ['id' => [], 'nob' => [], 'pib' => []];
-        while (isset($_POST["item-select-" . $itemNo])) {
-            $packageData['id'][] = $_POST["item-select-" . $itemNo];
-            $packageData['nob'][] = $_POST["nob-" . $itemNo];
-            $packageData['pib'][] = $_POST["pib-" . $itemNo];
+        $itemTotal = 0;
+        $packageNo = 1;
+        $packageTotal = 0;
+        $itemData = ['id' => [], 'qty' => []];
+        $packageData = ['id' => [], 'qty' => []];
+        while (isset($_POST["select-item-" . $itemNo])) {
+            $itemId = $_POST["select-item-" . $itemNo];
+            $itemData['id'][] = $itemId;
+            $itemData['qty'][] = $_POST["item-quantity-" . $itemNo];
+            $result = $conn->query("SELECT * FROM `item` WHERE `id`= '$itemId'");
+            $items = $result->fetch_all(MYSQLI_ASSOC);
+            $itemTotal+=$items[0]['rate']*$_POST["item-quantity-" . $itemNo];
             $itemNo++;
         }
+        while (isset($_POST["select-package-" . $packageNo])) {
+            $packageData['id'][] = $_POST["select-package-" . $packageNo];
+            $packageData['qty'][] = $_POST["package-quantity-" . $packageNo];
+            $packageNo++;
+        }
+        $jsonI = json_encode($itemData);
         $jsonP = json_encode($packageData);
         // print_r($jsonP);
-        $pName = $_POST["pName"];
-        $pRemark = $_POST["pRemark"];
-
-        $stmt = $conn->prepare("INSERT INTO package (`name`, `package`, `remark`) VALUES ('$pName', ?, '$pRemark')");
-        $stmt->bind_param("s", $jsonP);
+        $cName = $_POST["customer-name"];
+        $cMobile = $_POST["customer-mobile"];
+        $cEmail = $_POST["customer-email"];
+        $cAddress = $_POST["customer-address"];
+        $dDate = $_POST["delivery-date"];
+        $rDate = $_POST["reminder-date"];
+        $status = 1;
+        // $stmt = $conn->prepare("INSERT INTO orders (`name`, `mobile`, `email`, `address`, `dod`, `reminder`, `status`, `items`, `packages`) VALUES ('$cName', '$cMobile', '$cEmail', '$cAddress', '$dDate', '$rDate', '$status', ?)");
+        // $stmt->bind_param("s", $jsonI, $jsonP);
+        $stmt = $conn->prepare("INSERT INTO orders (`name`, `mobile`, `email`, `address`, `dod`, `reminder`, `status`, `items`, `packages`, `total`) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        $stmt->bind_param("ssssssissd", $cName, $cMobile, $cEmail, $cAddress, $dDate, $rDate, $status, $jsonI, $jsonP, $itemTotal);
+        
         if ($stmt->execute()) {
             $_SESSION['successMsg'] = "New Package Created Successfully";
             header("location: " . urlNow());
@@ -80,111 +101,79 @@ require('components/_header.php');
                                             <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Customer Name" name="customer-name" id="customer-name">
                                         </div>
                                         <div class="sm:w-1/3 w-full p-2">
-                                            <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Mobile Number</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
+                                            <label for="customer-mobile" class="mb-3 text-base font-medium text-[#07074D]">Mobile Number</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-mobile" id="customer-mobile">
                                         </div>
                                         <div class="sm:w-1/3 w-full p-2">
-                                            <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Email</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="email" placeholder="xyz@domain.com" name="customer-name" id="customer-name">
+                                            <label for="customer-email" class="mb-3 text-base font-medium text-[#07074D]">Email</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="email" placeholder="xyz@domain.com" name="customer-email" id="customer-email">
                                         </div>
                                         <div class="w-full p-2">
-                                            <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Delivery Address</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Delivery Address" name="customer-name" id="customer-name">
+                                            <label for="customer-address" class="mb-3 text-base font-medium text-[#07074D]">Delivery Address</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Delivery Address" name="customer-address" id="customer-address">
                                         </div>
                                         <div class="sm:w-2/3 w-full p-2">
-                                            <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Delivery Date & Time</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="datetime-local" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
+                                            <label for="delivery-date" class="mb-3 text-base font-medium text-[#07074D]">Delivery Date & Time</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="datetime-local" placeholder="Enter Mobile No." name="delivery-date" id="delivery-date">
                                         </div>
                                         <div class="sm:w-1/3 w-full p-2">
-                                            <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Reminder Date</label>
-                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="date" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
+                                            <label for="reminder-date" class="mb-3 text-base font-medium text-[#07074D]">Reminder Date</label>
+                                            <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="date" placeholder="Enter Mobile No." name="reminder-date" id="reminder-date">
                                         </div>
                                     </div>
-                                    <hr class="my-3">
+                                    <hr class="my-3 border-2">
                                     <div class="flex items-center my-4 justify-between">
                                         <h3 class="text-xl font-bold leading-none text-cyan-600">Items</h3>
-                                        <div id="add-item" class="cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Add Item</div>
                                     </div>
                                     <div id="item-div">
-                                        <div class="flex w-full justify-between">
-                                            <div class="flex w-11/12">
-                                                <div class="xl:w-2/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Select Item</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                                <div class="xl:w-1/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                                <div class="xl:w-1/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Unit</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                            </div>
-                                            <div class="flex w-1/12 m-auto justify-center">
-                                                <div name="del-btn" class="cursor-pointer text-rose-900 hover:text-rose-400" type="submit" onclick="return confirm('Are You Sure?')">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="flex w-full justify-between">
-                                            <div class="flex w-11/12">
-                                                <div class="xl:w-2/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Select Item</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                                <div class="xl:w-1/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                                <div class="xl:w-1/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Unit</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                            </div>
-                                            <div class="flex w-1/12 m-auto justify-center">
-                                                <div name="del-btn" class="cursor-pointer text-rose-900 hover:text-rose-400" type="submit" onclick="return confirm('Are You Sure?')">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
-                                                    </svg>
-                                                </div>
-                                            </div>
-                                        </div>
+                                        <!-- Item Add dynamically -->
                                     </div>
-                                    <hr class="my-3">
-                                    <div class="flex items-center my-4 justify-between">
+                                    <div class="flex flex-wrap justify-end gap-2">
+                                        <div id="remove-item" class="w-40 cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none" style="display: none;">Remove Last</div>
+                                        <div id="add-item" class="w-40 cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Add Item</div>
+                                    </div>
+                                    <hr class="my-3 border-2">
+                                    <div class="flex items-center my-4">
                                         <h3 class="text-xl font-bold leading-none text-cyan-600">Packages</h3>
-                                        <div id="add-package" class="cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Add Package</div>
                                     </div>
                                     <div id="package-div">
-                                        <div class="flex w-full justify-between">
-                                            <div class="flex w-11/12">
-                                                <div class="xl:w-2/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Select Item</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                                <div class="xl:w-1/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                                <div class="xl:w-1/4 w-1/2 p-2">
-                                                    <label for="customer-name" class="mb-3 text-base font-medium text-[#07074D]">Unit</label>
-                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="customer-name" id="customer-name">
-                                                </div>
-                                            </div>
-                                            <div class="flex w-1/12 m-auto justify-center">
-                                                <div name="del-btn" class="cursor-pointer text-rose-900 hover:text-rose-400" type="submit" onclick="return confirm('Are You Sure?')">
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
-                                                        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6z" />
-                                                        <path fill-rule="evenodd" d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118zM2.5 3V2h11v1h-11z" />
-                                                    </svg>
-                                                </div>
-                                            </div>
+
+                                    </div>
+                                    <div class="flex flex-wrap justify-end gap-2">
+                                        <div id="remove-package" class="w-40 cursor-pointer bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none" style="display: none;">Remove Last</div>
+                                        <div id="add-package" class="w-40 cursor-pointer bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Add Package</div>
+                                    </div>
+                                    <!-- <hr class="my-3 border-2">
+                                    <div class="items-center my-4">
+                                        <div class="flex justify-between">
+                                            <h3 class="text-xl font-bold leading-none text-cyan-600 my-1">Total</h3>
+                                            <span class="text-lg">12345/-</span>
                                         </div>
+                                        <hr>
+                                        <div class="flex justify-between">
+                                            <h3 class="text-xl font-bold leading-none text-cyan-600 my-1">Discount</h3>
+                                            <input class="text-end" type="number" step="any" placeholder="Enter amount">
+                                        </div>
+                                        <hr>
+                                        <div class="flex justify-between">
+                                            <h3 class="text-xl font-bold leading-none text-cyan-600 my-1">Net Amount</h3>
+                                            <span class="text-lg">12345/-</span>
+                                        </div>
+                                        <hr>
+                                        <div class="flex justify-between">
+                                            <h3 class="text-xl font-bold leading-none text-cyan-600 my-1">Advance Received</h3>
+                                            <input class="text-end" type="number" step="any" placeholder="Enter amount">
+                                        </div>
+                                        <hr>
+                                        <div class="flex justify-between">
+                                            <h3 class="text-xl font-bold leading-none text-cyan-600 my-1">Net Amount</h3>
+                                            <span class="text-lg">12345/-</span>
+                                        </div>
+                                    </div> -->
+                                    <div class="flex justify-center my-12">
+                                        <button name="create-order" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">
+                                            Create Customer Order
+                                        </button>
                                     </div>
                                 </form>
                             </div>
@@ -199,50 +188,73 @@ require('components/_header.php');
 </div>
 <script>
     $(document).ready(function() {
-        let itemNo = 1;
-        $("#removeItem").hide()
-        $("#removeItem").click(function() {
-            $("#addItemBox").children("div").slice(-4).remove();
+        let itemNo = 0;
+        let packageNo = 0;
+        // $("#remove-item").hide()
+        // $("#remove-package").hide()
+        $("#remove-item").click(function() {
+            $("#item-div").children("div").slice(-1).remove();
             itemNo--;
-            if (itemNo == 1) {
-                $("#removeItem").hide()
+            if (itemNo == 0) {
+                $("#remove-item").hide()
             }
         })
-        $("#addItem").click(function() {
+        $("#remove-package").click(function() {
+            $("#package-div").children("div").slice(-1).remove();
+            packageNo--;
+            if (packageNo == 0) {
+                $("#remove-package").hide()
+            }
+        })
+        $("#add-item").click(function() {
             itemNo++;
-            $("#removeItem").show()
-            $("#addItemBox").append(`
-            <div class="border-t-2 my-2 w-full"></div>
-            <div class="w-full px-3">
-                                            <div class="mb-5">
-                                                <label for="item-select-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
-                                                    Select Item ${itemNo}
-                                                </label>
-                                                <select name="item-select-${itemNo}" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-${itemNo}">
-                                                    <option value="0">Select</option>
-                                                    <?php foreach ($items as $item) : ?>
-                                                        <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
-                                                    <?php endforeach; ?>
-                                                </select>
+            $("#remove-item").show()
+            $("#item-div").append(`<div class="flex w-full justify-between">
+                                            <div class="flex flex-wrap w-full">
+                                                <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
+                                                    <label for="select-item-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Item ${itemNo}</label>
+                                                    <select class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-item-${itemNo}" id="select-item-${itemNo}">
+                                                        <option value="0">Select</option>
+                                                        <?php
+                                                        $result = $conn->query("SELECT * FROM `item` WHERE `removed`= 0");
+                                                        $items = $result->fetch_all(MYSQLI_ASSOC);
+                                                        foreach ($items as $item) :
+                                                        ?>
+                                                            <option value="<?= $item['id'] ?>"><?= $item['name'] ?> | Rate: <?= $item['rate'] . '/' . $item['uom'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <div class="xl:w-1/4 sm:w-1/3 w-full p-2">
+                                                    <label for="item-quantity-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
+                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="number" step="any" placeholder="Enter Item Quantity" name="item-quantity-${itemNo}" id="item-quantity-${itemNo}">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="w-full px-3 sm:w-1/2">
-                                            <div class="mb-5">
-                                                <label for="nob-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
-                                                    Total No of Box
-                                                </label>
-                                                <input type="number" name="nob-${itemNo}" id="nob-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                            </div>`);
+        });
+        $("#add-package").click(function() {
+            packageNo++;
+            $("#remove-package").show()
+            $("#package-div").append(`<div class="flex w-full justify-between">
+                                            <div class="flex flex-wrap w-full">
+                                                <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
+                                                    <label for="select-package-${packageNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Package ${packageNo}</label>
+                                                    <select class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-package-${packageNo}" id="select-package-${packageNo}">
+                                                        <option value="0">Select</option>
+                                                        <?php
+                                                        $result = $conn->query("SELECT * FROM `package`");
+                                                        $packages = $result->fetch_all(MYSQLI_ASSOC);
+                                                        foreach ($packages as $package) :
+                                                        ?>
+                                                            <option value="<?= $package['id'] ?>"><?= $package['name'] ?></option>
+                                                        <?php endforeach; ?>
+                                                    </select>
+                                                </div>
+                                                <div class="xl:w-1/4 sm:w-1/3 w-full p-2">
+                                                    <label for="package-quantity-${packageNo}" class="mb-3 text-base font-medium text-[#07074D]">Quantity</label>
+                                                    <input class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="number" step="any" placeholder="Enter Item Quantity" name="package-quantity-${packageNo}" id="package-quantity-${packageNo}">
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div class="w-full px-3 sm:w-1/2">
-                                            <div class="mb-5">
-                                                <label for="pib-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
-                                                    PCS in one Box
-                                                </label>
-                                                <input type="number" step="any" name="pib-${itemNo}" id="pib-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
-                                            </div>
-                                        </div>
-            `);
+                                            </div>`);
         });
     });
 </script>
