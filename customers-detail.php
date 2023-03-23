@@ -31,6 +31,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $result = mysqli_query($conn, $sql);
                 header("location: " . url() . "create-order.php?order=" . $orderId);
                 exit();
+            }elseif (isset($_GET["order"]) && isset($_POST["cancel"])) {
+                $orderId = $_GET["order"];
+                $sql = "UPDATE `orders` SET `status`= 5 WHERE `id`='$orderId'";
+                $result = mysqli_query($conn, $sql);
+                if ($result) {
+                    $_SESSION['errorMsg'] = "Order Canceled";
+                    header("location: " . urlNow());
+                    exit();
+                }
             }
             header("location: " . urlNow());
             exit();
@@ -83,7 +92,7 @@ require('components/_header.php');
                         </div>
                         <div class="flex flex-wrap w-full">
                             <div class="w-1/2">
-                                <span class="text-xl"><?= $order['name'] ?></span>
+                                <span class="text-xl font-bold"><?= $order['name'] ?></span>
                             </div>
                             <div class="w-1/2 text-end">
                                 OrderNo: <?= $order['id'] ?>
@@ -194,17 +203,32 @@ require('components/_header.php');
                                         <span>Rs. <?= $order['balance'] ?>/-</span>
                                         <input type="hidden" name="balance" value="<?= $order['balance'] ?>">
                                     </div>
+                                    <?php if($order['status']!=5): ?>
                                     <div class="flex w-full flex-wrap justify-center gap-5">
+                                        <?php if($order['status']==1): ?>
                                         <button name="update" type="submit" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Update</button>
                                         <button name="confirm" type="submit" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Proceed</button>
+                                        <?php endif ?>
+                                        <button name="cancel" type="submit" class="bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Cancel</button>
                                     </div>
+                                    <?php endif ?>
                                 </form>
                             </div>
                         </div>
                     </div>
                 <?php else : ?>
                     <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
-                        <h3 class="text-2xl font-bold leading-none text-gray-900 mb-4">All Customers Order</h3>
+                        <div class="flex justify-between w-full">
+                            <h3 class="text-2xl font-bold leading-none text-cyan-600 mb-4">All Customers Order</h3>
+                            <div class="pt-2 relative text-gray-600 my-2">
+                                <input class="border-2 border-gray-300 bg-white h-10 px-5 pr-16 rounded-lg text-sm focus:outline-none" type="search" name="search" placeholder="Search">
+                                <button type="submit" class="absolute right-0 top-0 mt-5 mr-4">
+                                    <svg class="text-gray-600 h-4 w-4 fill-current" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Capa_1" x="0px" y="0px" viewBox="0 0 56.966 56.966" style="enable-background:new 0 0 56.966 56.966;" xml:space="preserve" width="512px" height="512px">
+                                        <path d="M55.146,51.887L41.588,37.786c3.486-4.144,5.396-9.358,5.396-14.786c0-12.682-10.318-23-23-23s-23,10.318-23,23  s10.318,23,23,23c4.761,0,9.298-1.436,13.177-4.162l13.661,14.208c0.571,0.593,1.339,0.92,2.162,0.92  c0.779,0,1.518-0.297,2.079-0.837C56.255,54.982,56.293,53.08,55.146,51.887z M23.984,6c9.374,0,17,7.626,17,17s-7.626,17-17,17  s-17-7.626-17-17S14.61,6,23.984,6z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
                         <?php
                         $result = $conn->query("SELECT * FROM `orders` ORDER BY `id` DESC");
                         $orders = $result->fetch_all(MYSQLI_ASSOC);
@@ -212,7 +236,7 @@ require('components/_header.php');
                         ?>
                             <div class="flex flex-wrap bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
                                 <div class="w-1/2">
-                                    <span class="text-xl"><?= $order['name'] ?></span>
+                                    <span class="text-xl font-bold"><?= $order['name'] ?></span>
                                 </div>
                                 <div class="w-1/2 text-end">
                                     OrderNo: <?= $order['id'] ?>
@@ -239,10 +263,10 @@ require('components/_header.php');
                                         Reminder Date: <?= $order['reminder'] ?>
                                     </div>
                                     <div class="w-full">
-                                        Status: <span class="text-red-700"><?= $order['status'] == 1 ? 'Order Pending' : ($order['status'] == 2 ? 'Order Preparing' : ($order['status'] == 3 ? 'Ready To Ship' : ($order['status'] == 4 ? 'Order Completed' : 'Order Canceled'))) ?></span>
+                                        <span class="font-bold">Status:</span> <span class="text-red-600 font-semibold"><?= $order['status'] == 1 ? 'Order Pending' : ($order['status'] == 2 ? 'Order Preparing' : ($order['status'] == 3 ? 'Ready To Ship' : ($order['status'] == 4 ? 'Order Completed' : 'Order Canceled'))) ?></span>
                                     </div>
-                                    <div class="w-full text-end">
-                                        <a class="bg-red" href="?order=<?= $order['id'] ?>">Details</a>
+                                    <div class="mt-5 w-full text-end">
+                                        <a class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-2 px-3 text-center text-base font-semibold text-white outline-none" href="?order=<?= $order['id'] ?>">Details</a>
                                     </div>
                                 </div>
                             </div>

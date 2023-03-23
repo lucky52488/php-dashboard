@@ -94,7 +94,7 @@ require('components/_header.php');
                                                     Select Item 1
                                                 </label>
                                                 <select required name="item-select-1" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-1">
-                                                    <option value="0">Select</option>
+                                                    
                                                     <?php
                                                     $result = $conn->query("SELECT * FROM `item` WHERE `removed`= 0");
                                                     $items = $result->fetch_all(MYSQLI_ASSOC);
@@ -110,7 +110,7 @@ require('components/_header.php');
                                                 <label for="nob-1" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Total No of Box
                                                 </label>
-                                                <input required type="number" name="nob-1" id="nob-1" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required value="1" type="number" name="nob-1" id="nob-1" placeholder="Enter Number of Boxes" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
                                         <div class="w-full px-3 sm:w-1/3">
@@ -118,7 +118,7 @@ require('components/_header.php');
                                                 <label for="pib-1" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     PCS in one Box
                                                 </label>
-                                                <input required type="number" step="any" name="pib-1" id="pib-1" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required type="number" step="any" name="pib-1" id="pib-1" placeholder="Enter PCS in one Box" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
                                     </div>
@@ -132,7 +132,7 @@ require('components/_header.php');
                                                 <label for="pRemark" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Remark
                                                 </label>
-                                                <input type="text" name="pRemark" id="pRemark" placeholder="Enter New Item Name" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input type="text" name="pRemark" id="pRemark" placeholder="Remark (if any)" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
                                     </div>
@@ -172,7 +172,7 @@ require('components/_header.php');
                                                     Select Item ${itemNo}
                                                 </label>
                                                 <select required name="item-select-${itemNo}" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" id="item-select-${itemNo}">
-                                                    <option value="0">Select</option>
+                                                    
                                                     <?php foreach ($items as $item) : ?>
                                                         <option value="<?= $item['id'] ?>"><?= $item['name'] ?></option>
                                                     <?php endforeach; ?>
@@ -184,7 +184,7 @@ require('components/_header.php');
                                                 <label for="nob-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Total No of Box
                                                 </label>
-                                                <input required type="number" name="nob-${itemNo}" id="nob-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required value="1" type="number" name="nob-${itemNo}" id="nob-${itemNo}" placeholder="Enter Number of Boxes" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
                                         <div class="w-full px-3 sm:w-1/3">
@@ -192,7 +192,7 @@ require('components/_header.php');
                                                 <label for="pib-${itemNo}" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     PCS in one Box
                                                 </label>
-                                                <input required type="number" step="any" name="pib-${itemNo}" id="pib-${itemNo}" placeholder="Enter Weight per Pcs" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <input required type="number" step="any" name="pib-${itemNo}" id="pib-${itemNo}" placeholder="Enter PCS in one Box" min="0" class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
                                             </div>
                                         </div>
             `);
