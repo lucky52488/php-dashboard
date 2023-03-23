@@ -88,7 +88,7 @@ require('components/_header.php');
                         </a>
 
                         <div class="flex items-center justify-center mb-4">
-                            <h3 class="text-xl font-bold leading-none text-gray-900">Order No. <?= $orderId ?></h3>
+                            <h3 class="text-xl font-bold leading-none text-gray-900">Order No. <?= $orderId ?> | <span class="font-semibold text-red-700"><?= $order['status'] == 1 ? 'Pending' : ($order['status'] == 2 ? 'Preparing' : ($order['status'] == 3 ? 'Ready To Ship' : ($order['status'] == 4 ? 'Completed' : 'Canceled'))) ?></span></h3>
                         </div>
                         <div class="flex flex-wrap w-full">
                             <div class="w-1/2">
@@ -203,13 +203,13 @@ require('components/_header.php');
                                         <span>Rs. <?= $order['balance'] ?>/-</span>
                                         <input type="hidden" name="balance" value="<?= $order['balance'] ?>">
                                     </div>
-                                    <?php if($order['status']!=5): ?>
+                                    <?php if($order['status']<4): ?>
                                     <div class="flex w-full flex-wrap justify-center gap-5">
                                         <?php if($order['status']==1): ?>
                                         <button name="update" type="submit" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Update</button>
                                         <button name="confirm" type="submit" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Proceed</button>
                                         <?php endif ?>
-                                        <button name="cancel" type="submit" class="bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Cancel</button>
+                                        <button name="cancel" type="submit" class="bg-red-600 hover:bg-red-700 focus:ring-4 focus:ring-red-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">Cancel Order</button>
                                     </div>
                                     <?php endif ?>
                                 </form>
