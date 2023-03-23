@@ -233,7 +233,7 @@ require('components/_header.php');
                     <div class="grid grid-cols-1 2xl:grid-cols-1 xl:gap-4 my-4">
                         <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
                             <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-xl font-bold leading-none text-gray-900">All Items Detail</h3>
+                                <h3 class="text-xl font-bold leading-none text-cyan-600">All Items Detail</h3>
                             </div>
                             <div class="flow-root">
                                 <ul role="list" class="divide-y divide-gray-200">

@@ -94,7 +94,7 @@ require('components/_header.php');
                             <div class="w-1/2">
                                 <span class="text-xl font-bold"><?= $order['name'] ?></span>
                             </div>
-                            <div class="w-1/2 text-end">
+                            <div class="w-1/2 text-end font-bold">
                                 OrderNo: <?= $order['id'] ?>
                             </div>
                             <div class="lg:w-1/2 w-full">
@@ -125,7 +125,7 @@ require('components/_header.php');
                                     <?= $order['alternate-no'] ? 'Alternate Mobile: ' . $order['alternate-no'] : '' ?>
                                 </div>
                             </div>
-                            <div class="w-full border-2 my-10">
+                            <div class="w-full border-2 rounded border-cyan-300 my-10">
                                 <?php
                                 $itemJ = json_decode($order['items'], true);
                                 $packageJ = json_decode($order['packages'], true);
@@ -143,12 +143,12 @@ require('components/_header.php');
                                         $data = $itemData[0];
                                         $price = $data['rate'];
                                     ?>
-                                        <li class="w-full flex justify-between">
+                                        <li class="w-full my-1 flex justify-between">
                                             <div class="w-1/3"><?= $key + 1 ?>. <?= $data['name'] ?> | Rate: Rs. <?= $price ?>/<?= $data['uom'] ?></div>
                                             <div class="w-1/3 text-center">Quantity: <?= $itemJ['qty'][$key] ?> <?= $data['uom'] ?></div>
                                             <div class="w-1/3 text-end">Price: <?= $itemJ['qty'][$key] * $price ?>/-</div>
                                         </li>
-                                        <hr>
+                                        
                                     <?php } ?>
                                 </ul>
                                 <ul class="my-3 p-5">
@@ -165,40 +165,39 @@ require('components/_header.php');
                                         $data = $itemData[0];
                                         $price = $data['total'];
                                     ?>
-                                        <li class="w-full flex justify-between">
+                                        <li class="w-full my-1 flex justify-between">
                                             <div class="w-1/3"><?= $key + 1 ?>. <?= $data['name'] ?> | Price: Rs. <?= $price ?>/-</div>
                                             <div class="w-1/3 text-center">Quantity: <?= $packageJ['qty'][$key] ?></div>
                                             <div class="w-1/3 text-end">Price: <?= $packageJ['qty'][$key] * $price ?>/-</div>
                                         </li>
-                                        <hr>
                                     <?php } ?>
                                 </ul>
                             </div>
                             <div class="w-full">
                                 <form action="" method="post">
-                                    <div class="flex w-full flex-wrap justify-between">
+                                    <div class="flex w-full flex-wrap justify-between my-2">
                                         <span>Total Amount</span>
                                         <span>Rs. <?= $order['total'] ?>/-</span>
                                         <input type="hidden" name="total" value="<?= $order['total'] ?>">
                                     </div>
                                     <hr>
-                                    <div class="flex w-full flex-wrap justify-between">
+                                    <div class="flex w-full flex-wrap justify-between my-2">
                                         <span>Discount</span>
                                         <input value="<?= $order['discount'] ?>" class="text-end text-red-600" type="number" step="any" name="discount" id="discount" placeholder="Enter Amount">
                                     </div>
                                     <hr>
-                                    <div class="flex w-full flex-wrap justify-between">
+                                    <div class="flex w-full flex-wrap justify-between my-2">
                                         <span>Net Amount</span>
                                         <span>Rs. <?= $order['net'] ?>/-</span>
                                         <input type="hidden" name="net" value="<?= $order['net'] ?>">
                                     </div>
                                     <hr>
-                                    <div class="flex w-full flex-wrap justify-between">
+                                    <div class="flex w-full flex-wrap justify-between my-2">
                                         <span>Advance Received</span>
                                         <input value="<?= $order['advance'] ?>" class="text-end text-red-600" type="number" step="any" name="advance" id="advance" placeholder="Enter Amount">
                                     </div>
                                     <hr>
-                                    <div class="flex w-full flex-wrap justify-between">
+                                    <div class="flex w-full flex-wrap justify-between my-2">
                                         <span>Balance</span>
                                         <span>Rs. <?= $order['balance'] ?>/-</span>
                                         <input type="hidden" name="balance" value="<?= $order['balance'] ?>">
@@ -238,7 +237,7 @@ require('components/_header.php');
                                 <div class="w-1/2">
                                     <span class="text-xl font-bold"><?= $order['name'] ?></span>
                                 </div>
-                                <div class="w-1/2 text-end">
+                                <div class="w-1/2 text-end font-bold">
                                     OrderNo: <?= $order['id'] ?>
                                 </div>
                                 <div class="lg:w-1/2 w-full">

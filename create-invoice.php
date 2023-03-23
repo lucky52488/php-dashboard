@@ -243,7 +243,7 @@ require('components/_header.php');
                                             <div class="flex flex-wrap w-full">
                                                 <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
                                                     <label for="select-item-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Item ${itemNo}</label>
-                                                    <select required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-item-${itemNo}" id="select-item-${itemNo}">
+                                                    <select required class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" name="select-item-${itemNo}" id="select-item-${itemNo}">
                                                         <option value="0">Select</option>
                                                         <?php
                                                         $result = $conn->query("SELECT * FROM `item` WHERE `removed`= 0");
