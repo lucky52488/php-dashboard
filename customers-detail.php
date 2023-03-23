@@ -233,7 +233,7 @@ require('components/_header.php');
                         $orders = $result->fetch_all(MYSQLI_ASSOC);
                         foreach ($orders as $key => $order) :
                         ?>
-                            <div class="flex flex-wrap bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
+                            <div class="flex flex-wrap bg-slate-50 shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
                                 <div class="w-1/2">
                                     <span class="text-xl font-bold"><?= $order['name'] ?></span>
                                 </div>
