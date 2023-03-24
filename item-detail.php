@@ -262,7 +262,7 @@ require('components/_header.php');
                                                     </div>
                                                     <div class="flex-1 min-w-0">
                                                         <p class="text-sm font-medium text-gray-900">
-                                                            <?= $item['source'] ?> | <?= $item['pcs'] ?> PCS Available
+                                                            <?= $item['source'] ?>
                                                         </p>
                                                         <p class="text-sm text-gray-500">
                                                             <?= $item['date'] ?>
@@ -270,13 +270,15 @@ require('components/_header.php');
                                                     </div>
                                                 </div>
                                                 <div class="flex flex-1">
-                                                    <div class="flex-1 min-w-0">
+                                                    <div class="flex-1 min-w-0 my-auto">
                                                         <p class="text-sm font-medium text-gray-900">
                                                             Rs: <?= $item['rate'] . '/' . $item['uom'] ?>
-                                                        </p>
+                                                        <!-- </p>
                                                         <p class="text-sm text-gray-500">
-                                                            <?= $item['uom'] == 'PCS' ? '' : '(Weight/PCS=' . $item['weight-per-pcs'] . ')' ?>
-                                                        </p>
+                                                            <?php 
+                                                            // echo $item['uom']." == 'PCS' ? '' : '(Weight/PCS='" . $item['weight-per-pcs'] . ")";
+                                                            ?>
+                                                        </p> -->
                                                     </div>
                                                     <div class="inline-flex mr-4 items-center text-base font-semibold text-gray-900">
                                                         <form action="" method="get">

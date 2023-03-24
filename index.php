@@ -28,45 +28,61 @@ require('components/_header.php');
                     $_SESSION['errorMsg'] = false;
                 } ?>
                 <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
-                    <h3 class="text-2xl font-bold leading-none text-gray-900 mb-4">Latest Customers</h3>
+                    <div class="flex justify-between w-full">
+                        <h3 class="text-2xl font-bold leading-none text-cyan-600 mb-4">Latest Orders</h3>
+                    </div>
                     <?php
                     $result = $conn->query("SELECT * FROM `orders` ORDER BY `id` DESC LIMIT 5");
                     $orders = $result->fetch_all(MYSQLI_ASSOC);
                     foreach ($orders as $key => $order) :
                     ?>
-                        <div class="flex flex-wrap bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
-                            <div class="w-1/2">
-                                <span class="text-xl"><?= $order['name'] ?></span>
+                        <a href="<?= url().'orders-detail.php?order='.$order['id'] ?>">
+                            <div class="flex flex-wrap bg-slate-50 hover:bg-slate-200 duration-300 shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
+                                <div class="w-1/3">
+                                    <span class="text-xl font-bold  text-blue-900"><?= $order['name'] ?></span>
+                                </div>
+                                <div class="w-1/3 text-center font-bold text-blue-900">
+                                    <div>OrderNo: <?= $order['id'] ?></div>
+                                </div>
+                                <div class="w-1/3 text-end text-blue-900">
+                                    <span class="font-bold">Status:</span>
+                                    <?php
+                                    if ($order['status'] == 1) {
+                                        echo '<span class="text-orange-600 font-semibold">Order Pending</span>';
+                                    } elseif ($order['status'] == 2) {
+                                        echo '<span class="text-yellow-500 font-semibold">Order Preparing</span>';
+                                    } elseif ($order['status'] == 3) {
+                                        echo '<span class="text-blue-600 font-semibold">Ready To Ship</span>';
+                                    } elseif ($order['status'] == 4) {
+                                        echo '<span class="text-green-600 font-semibold">Order Completed</span>';
+                                    } else {
+                                        echo '<span class="text-red-600 font-semibold">Order Canceled</span>';
+                                    }
+                                    ?>
+                                </div>
+                                <div class="sm:w-1/2 w-full mt-5 sm:mt-0">
+                                    <div class="w-full my-1 font-semibold">
+                                        <?= $order['mobile'] ?>
+                                    </div>
+                                    <div class="w-full font-semibold my-1">
+                                        <?= $order['email'] ?>
+                                    </div>
+                                    <div class="w-full font-semibold my-1">
+                                        <?= $order['address'] ?>
+                                    </div>
+                                </div>
+                                <div class="sm:w-1/2 w-full sm:text-end mt-5 sm:mt-0">
+                                    <div class="w-full my-1">
+                                        <div class="font-semibold">Order Date & Time</div><?= $order['date'] ?>
+                                    </div>
+                                    <div class="w-full my-1">
+                                        <div class="font-semibold">Delivery Date & Time</div><?= $order['dod'] ?>
+                                    </div>
+                                    <div class="w-full my-1 text-end">
+                                    </div>
+                                </div>
                             </div>
-                            <div class="w-1/2 text-end">
-                                OrderNo: <?= $order['id'] ?>
-                            </div>
-                            <div class="lg:w-1/2 w-full">
-                                <div class="w-full">
-                                    <?= $order['mobile'] ?>
-                                </div>
-                                <div class="w-full">
-                                    <?= $order['email'] ?>
-                                </div>
-                                <div class="w-full">
-                                    <?= $order['address'] ?>
-                                </div>
-                            </div>
-                            <div class="lg:w-1/2 w-full lg:text-end">
-                                <div class="w-full">
-                                    Order Date: <?= $order['date'] ?>
-                                </div>
-                                <div class="w-full">
-                                    Delivery Date & Time: <?= $order['dod'] ?>
-                                </div>
-                                <div class="w-full">
-                                    Reminder Date: <?= $order['reminder'] ?>
-                                </div>
-                                <div class="w-full">
-                                    Status: <span class="text-red-700"><?= $order['status'] == 1 ? 'Order Pending' : ($order['status'] == 2 ? 'Order Preparing' : ($order['status'] == 3 ? 'Ready To Ship' : ($order['status'] == 4 ? 'Order Completed' : 'Order Canceled'))) ?></span>
-                                </div>
-                            </div>
-                        </div>
+                        </a>
                     <?php endforeach ?>
                 </div>
             </div>

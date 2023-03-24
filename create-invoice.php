@@ -12,7 +12,7 @@ if ($_SESSION['userRole'] > 2) {
 }
 
 require("components/_dataConnect.php");
-$title = "New Customer Order";
+$title = "Create New Order";
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if (isset($_POST["create-order"])) {
@@ -75,7 +75,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         if ($stmt->execute()) {
             $_SESSION['successMsg'] = "Customer Invoice Created Successfully";
-            header("location: " . url().'customers-detail.php');
+            header("location: " . url().'orders-detail.php');
             exit();
         } else {
             $_SESSION['errorMsg'] = "Something went wrong";
@@ -202,7 +202,7 @@ require('components/_header.php');
                                     </div> -->
                                     <div class="flex justify-center my-12">
                                         <button name="create-order" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">
-                                            Create Customer Order
+                                            Create Order
                                         </button>
                                     </div>
                                 </form>
@@ -242,7 +242,7 @@ require('components/_header.php');
             $("#item-div").append(`<div class="flex w-full justify-between">
                                             <div class="flex flex-wrap w-full">
                                                 <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
-                                                    <label for="select-item-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Item ${itemNo}</label>
+                                                    <label for="select-item-${itemNo}" class="mb-3 text-base font-medium text-[#07074D]">ITEM ${itemNo}</label>
                                                     <select required class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" name="select-item-${itemNo}" id="select-item-${itemNo}">
                                                         <option value="0">Select</option>
                                                         <?php
@@ -267,8 +267,8 @@ require('components/_header.php');
             $("#package-div").append(`<div class="flex w-full justify-between">
                                             <div class="flex flex-wrap w-full">
                                                 <div class="xl:w-3/4 sm:w-2/3 w-full p-2">
-                                                    <label for="select-package-${packageNo}" class="mb-3 text-base font-medium text-[#07074D]">Select Package ${packageNo}</label>
-                                                    <select required class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-package-${packageNo}" id="select-package-${packageNo}">
+                                                    <label for="select-package-${packageNo}" class="mb-3 text-base font-medium text-[#07074D]">PACKAGE ${packageNo}</label>
+                                                    <select required class="w-full appearance-none rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" type="text" placeholder="Enter Mobile No." name="select-package-${packageNo}" id="select-package-${packageNo}">
                                                         <option value="0">Select</option>
                                                         <?php
                                                         $result = $conn->query("SELECT * FROM `package`");

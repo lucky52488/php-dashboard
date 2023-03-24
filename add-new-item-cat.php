@@ -5,7 +5,7 @@ if (!isset($_SESSION['loggedIn']) or !$_SESSION['loggedIn']) {
     header("location: " . url() . "login.php");
     exit();
 }
-if($_SESSION['userRole']>2){
+if ($_SESSION['userRole'] > 2) {
     header("location: " . url());
     exit();
 }
@@ -63,21 +63,25 @@ require('components/_header.php');
                 <div class="grid grid-cols-1 2xl:grid-cols-1 xl:gap-4 my-4">
                     <div class="bg-white shadow rounded-lg mb-4 p-4 sm:p-6 h-full">
                         <div class="flex items-center justify-center p-12">
-                            <div class="mx-auto w-full max-w-[550px]">
+                            <div class="mx-auto w-full max-w-[640px]">
                                 <form action="" method="POST">
                                     <div class="-mx-3 flex flex-wrap">
-                                        <div class="w-full px-3">
+                                        <div class="px-3 w-full">
                                             <div class="mb-5">
                                                 <label for="cat-name" class="mb-3 block text-base font-medium text-[#07074D]">
                                                     Add Item Category
                                                 </label>
-                                                <input type="text" name="cat-name" id="cat-name" placeholder="Enter New Item Category" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                <div class="flex gap-2">
+                                                    <input required type="text" name="cat-name" id="cat-name" placeholder="Enter New Item Category" class="w-full rounded-md border border-[#e0e0e0] bg-white py-3 px-6 text-base font-medium text-[#6B7280] outline-none focus:border-[#6A64F1] focus:shadow-md" />
+                                                    <button name="add-cat-button" class="text-cyan-600 hover:text-cyan-700">
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-check-circle-fill" viewBox="0 0 16 16">
+                                                            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z" />
+                                                        </svg>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
-                                    <button name="add-cat-button" class="bg-cyan-600 hover:bg-cyan-700 focus:ring-4 focus:ring-cyan-200 rounded-md py-3 px-8 text-center text-base font-semibold text-white outline-none">
-                                        Add Category
-                                    </button>
                                 </form>
                             </div>
                         </div>
